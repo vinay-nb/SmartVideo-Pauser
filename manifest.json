@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Video Pauser",
+  "version": "1.0",
+  "description": "Pauses video when switching tabs and resumes when returning.",
+  "permissions": ["tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
