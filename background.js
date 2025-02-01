@@ -33,24 +33,23 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.onUpdated.addListener(function onTabUpdated(tabId, changeInfo) {
     if (tabId === activeTabId && changeInfo.status === "complete") {
       // Send a "playVideo" message to the newly active tab
-      chrome.tabs
-        .sendMessage(tabId, { action: "playVideo" })
-        .then((response) => {
-          console.log("Play message sent to new tab:", response);
-        })
-        .catch((error) => {
-          if (
-            error.message ===
-            "Could not establish connection. Receiving end does not exist."
-          ) {
-            console.log("Content script not injected in new tab.");
-          } else {
-            console.error("Could not send play message:", error);
-          }
-        });
-
-      // Remove the listener to avoid sending multiple messages
-      chrome.tabs.onUpdated.removeListener(onTabUpdated);
+      setTimeout(() => {
+        chrome.tabs
+          .sendMessage(tabId, { action: "playVideo" })
+          .then((response) => {
+            console.log("Play message sent to new tab:", response);
+          })
+          .catch((error) => {
+            if (
+              error.message ===
+              "Could not establish connection. Receiving end does not exist."
+            ) {
+              console.log("Content script not injected in new tab.");
+            } else {
+              console.error("Could not send play message:", error);
+            }
+          });
+      }, 500); // Add a small delay to ensure the content script is ready
     }
   });
 });

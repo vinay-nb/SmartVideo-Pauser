@@ -1,8 +1,26 @@
-console.log("Content script is running!");
-
 // Find the first video element on the page
 function findVideoElement() {
-  return document.querySelector("video");
+  const videoElement = document.querySelector("video");
+  if (videoElement) {
+    console.log("Video element found:", videoElement);
+  } else {
+    console.log("No video element found.");
+  }
+  return videoElement;
+}
+
+// Wait for the video element to be added to the DOM
+function waitForVideoElement(callback) {
+  const observer = new MutationObserver((mutations, obs) => {
+    const videoElement = findVideoElement();
+    if (videoElement) {
+      obs.disconnect(); // Stop observing
+      callback(videoElement);
+    }
+  });
+
+  // Start observing the document for changes
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 // Listen for messages from the background script
@@ -29,12 +47,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ status: "noAction" });
     }
   } else if (message.action === "playVideo") {
-    const videoElement = findVideoElement();
-    if (videoElement) {
-      // Restore the playback state and time
+    // Wait for the video element to be ready
+    waitForVideoElement((videoElement) => {
       chrome.storage.local.get(["wasPlaying", "videoTime"], (result) => {
         if (result.wasPlaying) {
-          videoElement.currentTime = result.videoTime || 0; // Restore the playback time
+          // Restore the playback time and play the video
+          videoElement.currentTime = result.videoTime || 0;
           videoElement.play();
           console.log("Video resumed from time:", result.videoTime);
           sendResponse({ status: "success" });
@@ -43,10 +61,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ status: "noAction" });
         }
       });
-    } else {
-      console.log("No video element found.");
-      sendResponse({ status: "noVideo" });
-    }
+    });
   }
 
   // Return true to indicate the response will be sent asynchronously
