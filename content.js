@@ -35,11 +35,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.storage.local.set(
         { wasPlaying: true, videoTime: videoElement.currentTime },
         () => {
-          console.log("Video paused. State saved:", {
-            wasPlaying: true,
-            videoTime: videoElement.currentTime,
-          });
-          sendResponse({ status: "success" });
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Error saving playback state:",
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              status: "error",
+              message: chrome.runtime.lastError.message,
+            });
+          } else {
+            console.log("Video paused. State saved:", {
+              wasPlaying: true,
+              videoTime: videoElement.currentTime,
+            });
+            sendResponse({ status: "success" });
+          }
         }
       );
     } else {
@@ -50,7 +61,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Wait for the video element to be ready
     waitForVideoElement((videoElement) => {
       chrome.storage.local.get(["wasPlaying", "videoTime"], (result) => {
-        if (result.wasPlaying) {
+        if (chrome.runtime.lastError) {
+          console.error(
+            "Error retrieving playback state:",
+            chrome.runtime.lastError
+          );
+          sendResponse({
+            status: "error",
+            message: chrome.runtime.lastError.message,
+          });
+        } else if (result.wasPlaying) {
           // Restore the playback time and play the video
           videoElement.currentTime = result.videoTime || 0;
           videoElement.play();

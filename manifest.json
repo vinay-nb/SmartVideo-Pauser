@@ -3,7 +3,7 @@
   "name": "Smart Video Pauser",
   "version": "1.0",
   "description": "Pauses video when switching tabs and resumes when returning.",
-  "permissions": ["tabs"],
+  "permissions": ["tabs", "storage"],
   "background": {
     "service_worker": "background.js"
   },

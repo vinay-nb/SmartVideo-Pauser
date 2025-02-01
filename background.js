@@ -1,5 +1,3 @@
-console.log("Background script is running!");
-
 // Track the active tab ID
 let activeTabId = null;
 
